@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_green">#E4F4D8</color>
+    <color name="button_yellow">#E9D100</color>
+    <color name="navbar_green">#BDD8AA</color>
+    <color name="box_green">#C6FFB2</color>
+    <color name="darker_box_green">#A8D29D</color>
+    <color name="box_blue">#B5D7F6</color>
+    <color name="box_yellow">#E9D100</color>
+    <color name="button_green">#AAD6A0</color>
+    <color name="logout_red">#F89292</color>
+    <color name="menu_green">#A5D09A</color>
+    <color name="bg_yellow">#F9F2B5</color>
+    <color name="gray_text">#939393</color>
+</resources>
