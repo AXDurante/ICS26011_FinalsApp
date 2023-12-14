@@ -291,14 +291,14 @@ class DatabaseHelper(context: Context) :
         return activitiesList
     }
 
-    fun saveActivityToDatabase(userId: Long, courseId: Long, activityName: String, userScore: Double, maxScore: Double): Long {
+    fun saveActivityToDatabase(userId: Long, assessmentId: Long, activityName: String, userScore: Double, maxScore: Double): Long {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_ACTIVITY_NAME, activityName)
             put(COLUMN_ACTIVITY_USER_SCORE, userScore)
             put(COLUMN_ACTIVITY_MAX_SCORE, maxScore)
-            put(COLUMN_ACTIVITY_ASSESSMENT_ID, courseId) // Assuming the assessment_id is the same as courseId
-            put(COLUMN_ACTIVITY_USER_ID, userId)
+            put(COLUMN_ACTIVITY_ASSESSMENT_ID, assessmentId) // Corrected to use assessmentId
+            put(COLUMN_ACTIVITY_USER_ID, userId) // Corrected to use userId
         }
 
         val activityId = db.insert(TABLE_ACTIVITIES, null, values)

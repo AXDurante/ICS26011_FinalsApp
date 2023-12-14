@@ -221,7 +221,7 @@ class CourseWeight : AppCompatActivity() {
     }
 
     // Function to show the dialog for adding a new activity
-    private fun showAddActivityDialog(userId: Long, courseId: Long) {
+    private fun showAddActivityDialog(assessmentId: Long, userId: Long) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_activity, null)
         val enterActivity: TextInputEditText = dialogView.findViewById(R.id.enterActivity)
         val enterUserScore: TextInputEditText = dialogView.findViewById(R.id.enterUserScore)
@@ -244,7 +244,7 @@ class CourseWeight : AppCompatActivity() {
                 val maxScore = maxScoreText.toDouble()
 
                 // Save the activity to the database
-                saveActivityToDatabase(userId, courseId, activityName, userScore, maxScore)
+                saveActivityToDatabase(userId, assessmentId, activityName, userScore, maxScore)
 
                 // Dismiss the dialog
                 alertDialog.dismiss()
@@ -263,13 +263,7 @@ class CourseWeight : AppCompatActivity() {
     }
 
     // Function to save a new activity
-    private fun saveActivityToDatabase(
-        userId: Long,
-        courseId: Long,
-        activityName: String,
-        userScore: Double,
-        maxScore: Double
-    ) {
-        dbHelper.saveActivityToDatabase(userId, courseId, activityName, userScore, maxScore)
+    private fun saveActivityToDatabase(userId: Long, assessmentId: Long, activityName: String, userScore: Double, maxScore: Double) {
+        dbHelper.saveActivityToDatabase(userId, assessmentId, activityName, userScore, maxScore)
     }
 }
