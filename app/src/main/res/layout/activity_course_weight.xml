@@ -59,7 +59,7 @@
         android:id="@+id/textView11"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Current Grade:"
+        android:text="Course Grade:"
         android:textColor="@color/black"
         android:textSize="20dp"
         android:textStyle="bold"
@@ -71,7 +71,7 @@
         app:layout_constraintVertical_bias="0.583" />
 
     <TextView
-        android:id="@+id/textView12"
+        android:id="@+id/courseGrade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="N/A"
@@ -132,6 +132,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.94"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.976" />
+
+    <Button
+        android:id="@+id/btnCalculate"
+        android:layout_width="115dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="76dp"
+        android:backgroundTint="@color/button_yellow"
+        android:text="Calculate"
+        android:textColor="@color/black"
+        android:textSize="5pt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/addAssessment"
+        app:layout_constraintHorizontal_bias="0.782"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.976" />

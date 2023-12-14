@@ -14,7 +14,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "GradeIT"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 3
 
         private const val TABLE_USERS = "users"
         private const val COLUMN_USER_ID = "user_id"
@@ -26,12 +26,14 @@ class DatabaseHelper(context: Context) :
         private const val COLUMN_COURSE_ID = "course_id"
         private const val COLUMN_COURSE_NAME = "course_name"
         private const val COLUMN_COURSE_DESC = "course_desc"
+        private const val COLUMN_COURSE_SCORE = "course_score"
         private const val COLUMN_COURSE_USER_ID = "user_id"
 
         private const val TABLE_ASSESSMENTS = "assessments"
         private const val COLUMN_ASSESSMENT_ID = "assessment_id"
         private const val COLUMN_ASSESSMENT_NAME = "assessment_name"
         private const val COLUMN_ASSESSMENT_WEIGHT = "grade_weight"
+        private const val COLUMN_GRADE_AVERAGE = "grade_average"
         private const val COLUMN_ASSESSMENT_COURSE_ID = "course_id"
         private const val COLUMN_ASSESSMENT_USER_ID = "user_id"
 
@@ -53,13 +55,14 @@ class DatabaseHelper(context: Context) :
         // Creating new tables
         val createCoursesTable = (
                 "CREATE TABLE $TABLE_COURSES ($COLUMN_COURSE_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        + "$COLUMN_COURSE_NAME TEXT, $COLUMN_COURSE_DESC TEXT, $COLUMN_COURSE_USER_ID INTEGER, " +
+                        + "$COLUMN_COURSE_NAME TEXT, $COLUMN_COURSE_DESC TEXT, $COLUMN_COURSE_SCORE TEXT, $COLUMN_COURSE_USER_ID INTEGER, " +
                         "FOREIGN KEY($COLUMN_COURSE_USER_ID) REFERENCES $TABLE_USERS($COLUMN_USER_ID))")
         db?.execSQL(createCoursesTable)
 
         val createAssessmentsTable = (
                 "CREATE TABLE $TABLE_ASSESSMENTS ($COLUMN_ASSESSMENT_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        + "$COLUMN_ASSESSMENT_NAME TEXT, $COLUMN_ASSESSMENT_WEIGHT DOUBLE, $COLUMN_ASSESSMENT_COURSE_ID INTEGER, " +
+                        + "$COLUMN_ASSESSMENT_NAME TEXT, $COLUMN_ASSESSMENT_WEIGHT DOUBLE, " +
+                        "$COLUMN_GRADE_AVERAGE DOUBLE, $COLUMN_ASSESSMENT_COURSE_ID INTEGER, " +
                         "$COLUMN_ASSESSMENT_USER_ID INTEGER, " +
                         "FOREIGN KEY($COLUMN_ASSESSMENT_COURSE_ID) REFERENCES $TABLE_COURSES($COLUMN_COURSE_ID), " +
                         "FOREIGN KEY($COLUMN_ASSESSMENT_USER_ID) REFERENCES $TABLE_USERS($COLUMN_USER_ID))")
@@ -333,5 +336,45 @@ class DatabaseHelper(context: Context) :
         cursor.close()
 
         return parentList
+    }
+
+    fun updateGradeAverageInAssessment(userId: Long, assessmentId: Long, averageScore: Double): Int {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_GRADE_AVERAGE, averageScore)
+        }
+
+        // Update the grade_average column in the assessments table
+        val whereClause = "$COLUMN_ASSESSMENT_ID = ? AND $COLUMN_ASSESSMENT_USER_ID = ?"
+        val whereArgs = arrayOf(assessmentId.toString(), userId.toString())
+
+        val rowsUpdated = db.update(TABLE_ASSESSMENTS, values, whereClause, whereArgs)
+        db.close()
+
+        return rowsUpdated
+    }
+
+    @SuppressLint("Range")
+    fun getGradeAverage(userId: Long, assessmentId: Long): Double {
+        val db = this.readableDatabase
+        val columns = arrayOf(COLUMN_GRADE_AVERAGE)
+        val selection = "$COLUMN_ASSESSMENT_ID = ? AND $COLUMN_ASSESSMENT_USER_ID = ?"
+        val selectionArgs = arrayOf(assessmentId.toString(), userId.toString())
+
+        val cursor = db.query(
+            TABLE_ASSESSMENTS, columns, selection,
+            selectionArgs, null, null, null
+        )
+
+        var gradeAverage = 0.0
+
+        if (cursor.moveToFirst()) {
+            gradeAverage = cursor.getDouble(cursor.getColumnIndex(COLUMN_GRADE_AVERAGE))
+        }
+
+        cursor.close()
+        db.close()
+
+        return gradeAverage
     }
 }

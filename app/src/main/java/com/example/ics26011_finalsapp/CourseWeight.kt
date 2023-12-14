@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText
 
 class CourseWeight : AppCompatActivity() {
     private lateinit var dbHelper: DatabaseHelper
+    private var assessmentId: Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +77,11 @@ class CourseWeight : AppCompatActivity() {
         btnAddAssessment.setOnClickListener {
             // Show the dialog to add a new assessment
             showAddAssessmentDialog(courseId)
+        }
+
+        val btnCalculate: Button = findViewById(R.id.btnCalculate)
+        btnCalculate.setOnClickListener {
+            recalculateAndDisplayGrades()
         }
     }
 
@@ -221,7 +227,7 @@ class CourseWeight : AppCompatActivity() {
     }
 
     // Function to show the dialog for adding a new activity
-    private fun showAddActivityDialog(assessmentId: Long, userId: Long) {
+    private fun showAddActivityDialog(userId: Long, courseId: Long) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_activity, null)
         val enterActivity: TextInputEditText = dialogView.findViewById(R.id.enterActivity)
         val enterUserScore: TextInputEditText = dialogView.findViewById(R.id.enterUserScore)
@@ -244,7 +250,7 @@ class CourseWeight : AppCompatActivity() {
                 val maxScore = maxScoreText.toDouble()
 
                 // Save the activity to the database
-                saveActivityToDatabase(userId, assessmentId, activityName, userScore, maxScore)
+                saveActivityToDatabase(userId, courseId, activityName, userScore, maxScore)
 
                 // Dismiss the dialog
                 alertDialog.dismiss()
@@ -263,7 +269,71 @@ class CourseWeight : AppCompatActivity() {
     }
 
     // Function to save a new activity
-    private fun saveActivityToDatabase(userId: Long, assessmentId: Long, activityName: String, userScore: Double, maxScore: Double) {
-        dbHelper.saveActivityToDatabase(userId, assessmentId, activityName, userScore, maxScore)
+    private fun saveActivityToDatabase(
+        userId: Long,
+        courseId: Long,
+        activityName: String,
+        userScore: Double,
+        maxScore: Double
+    ) {
+        dbHelper.saveActivityToDatabase(userId, courseId, activityName, userScore, maxScore)
+    }
+
+    // Function to calculate and update grades
+    private fun calculateAndUpdateGrades(userId: Long, assessmentId: Long) {
+        val userId = SharedPreferencesManager(this).getLoggedInUserId()
+
+        // Step 1: Calculate total user_score and max_score for the assessment
+        val activities = dbHelper.getActivitiesFromDatabase(assessmentId.toInt(), userId)
+        var totalUserScore = 0.0
+        var totalMaxScore = 0.0
+
+        for (activity in activities) {
+            totalUserScore += activity.userScore
+            totalMaxScore += activity.maxScore
+        }
+
+        // Step 2: Calculate average_score
+        val averageScore = if (totalMaxScore != 0.0) {
+            totalUserScore / totalMaxScore
+        } else {
+            0.0
+        }
+
+        // Step 3: Update the database with average_score
+        dbHelper.updateGradeAverageInAssessment(userId, assessmentId, averageScore)
+
+        // Step 4: Calculate assessment_grades for all assessments
+        val assessments = dbHelper.fetchParentList(userId)
+        var totalGrade = 0.0
+
+        for (assessment in assessments) {
+            val gradeAverage = dbHelper.getGradeAverage(userId, assessment.assessmentId.toLong())
+            val assessmentGrade = if (assessment.gradeWeight != 0.0) {
+                gradeAverage / assessment.gradeWeight
+            } else {
+                0.0
+            }
+            totalGrade += assessmentGrade
+        }
+    }
+    private fun getAssessmentIdFromIntent(): Long {
+        return intent.getLongExtra("assessmentId", -1)
+    }
+
+    private fun updateUI() {
+        val userId = SharedPreferencesManager(this).getLoggedInUserId()
+        val assessmentId = getAssessmentIdFromIntent()
+        val gradeAverage = dbHelper.getGradeAverage(userId, assessmentId)
+        val gradeAverageTextView: TextView = findViewById(R.id.courseGrade)
+        gradeAverageTextView.text = "$gradeAverage"
+    }
+
+    // Call this function when you want to recalculate and update grades
+    private fun recalculateAndDisplayGrades() {
+        val userId = SharedPreferencesManager(this).getLoggedInUserId()
+        val assessmentId = getAssessmentIdFromIntent()
+        calculateAndUpdateGrades(userId, assessmentId)
+        updateUI()
     }
 }
